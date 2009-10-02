@@ -1,0 +1,5 @@
+//$Id$
+
+Serial 6.x-1.0 Beta
+===================
+First version.
