@@ -31,8 +31,13 @@ Optional modules:
 
 Installation
 ------------
-1. Copy the serial module directory to your Drupal sites/all/modules/ directory.
-2. Enable the module in administer > modules (admin/build/modules)
+Serial is installed in the same way as most other Drupal modules.
+Here are the instructions for anyone unfamiliar with the process:
+
+1. Copy this serial/ directory to your sites/all/modules directory.
+
+2. Back in your Web browser, navigate to Administer -> Site building -> Modules
+   (admin/build/modules) then enable the Serial module.
 
 Usage
 -----
@@ -42,7 +47,8 @@ as your choise, and Save. No other settings.
 
 Note: Existing nodes will also get serial values when a serial field is added.
 
-The serial token [field_serial-id] can be used with Path Auto.
+The serial token [{field-name}-id] can be used with Path Auto,
+where {field-name} is the serial field name (e.g. [field_serial-id] for field_serial).
 
 Author
 ------

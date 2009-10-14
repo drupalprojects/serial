@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * The Serial module main file.
+ */
+
 //==================//
 // Field Definition //
 //==================//
@@ -55,7 +60,7 @@ function serial_field_settings($op, $field) {
 }
 
 /**
- * Implemenation of hook_form_alter().
+ * Implementation of hook_form_alter().
  */
 function serial_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == 'content_field_edit_form' && $form['#field']['type'] == 'serial') {

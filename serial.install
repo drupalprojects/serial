@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ * Install, update and uninstall functions for the Serial module.
+ */
+
+/**
  * Implementation of hook_install().
  */
 function serial_install() {
