@@ -1,6 +1,6 @@
 <?php
 // $Id$
-
+ 
 /**
  * @file
  * Internal functions for the Serial module.
