@@ -1,6 +1,6 @@
 // $Id$ 
 
-Serial 6.x-1.0-beta3, 2009-10-20
+Serial 6.x-1.0-beta4, 2009-10-20
 --------------------------------
 - Fixed the "user warning: Duplicate entry" bug [604856] when configuring existing serial fields.
 - Fixed the cleanup query in initialization of existing nodes.

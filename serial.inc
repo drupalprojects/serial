@@ -13,7 +13,7 @@
  *   $query = 'INSERT INTO %s (nid) VALUES(%d)';
  *   db_query($query, db_prefix_tables('{'. $table .'}'), $nid);
  */
-
+ 
 /**
  * Creates an assistant serial table for a new created field.
  *
