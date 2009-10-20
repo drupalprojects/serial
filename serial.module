@@ -68,26 +68,27 @@ function serial_form_alter(&$form, $form_state, $form_id) {
     unset($form['widget']);
     unset($form['field']);
 
-    // Set serial values for old objects
-    module_load_include('inc', 'serial');
-    $field = $form['#field'];
-    $old_count = _serial_init_old_nodes($field);
-      // (field is not ready yet at serial_content_fieldapi's 'create instance')
-
-    // Show messages:
-    drupal_set_message(
-      t('Serial field %field has been created.',
-        array('%field' => $field['field_name']))
-    );
-    if ($old_count) {
-      drupal_set_message(
-        t('Serial values have been automatically set for %count existing nodes.',
-          array('%count' => $old_count))
-      );
-    }
-
-    // Try to skip the empty settings page and go back to Managed Fields:
+    // After creation of a new field:
     if (preg_match('#^.*destination.*\=(.*)$#', $form['#action'], $matches)) {
+      // Set serial values for old objects
+      module_load_include('inc', 'serial');
+      $field = $form['#field'];
+      $old_count = _serial_init_old_nodes($field);
+        // (field is not ready yet at serial_content_fieldapi's 'create instance')
+
+      // Show messages:
+      drupal_set_message(
+        t('Serial field %field has been created.',
+          array('%field' => $field['field_name']))
+      );
+      if ($old_count) {
+        drupal_set_message(
+          t('Serial values have been automatically set for %count existing nodes.',
+            array('%count' => $old_count))
+        );
+      }
+
+      // Go back to Managed Fields:
       drupal_goto($matches[1]);
     }
   }

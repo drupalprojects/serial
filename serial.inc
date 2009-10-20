@@ -125,13 +125,16 @@ function _serial_init_old_nodes($field) {
   while ($nid = db_result($result)) {
     $node = node_load($nid);
     $node->{$field_name}[0]['value'] = _serial_generate_value($nid, $field, FALSE);
+    $last_nid = $nid;
     $count++;
   }
 
   // Delete temporary records (except the last):
-  $serial_table = _serial_get_table_name($field);
-  $query = "DELETE FROM {$serial_table} WHERE nid < %d";
-  db_query($query, $nid);
+  if (isset($last_nid)) {
+    $serial_table = _serial_get_table_name($field);
+    $query = "DELETE FROM {$serial_table} WHERE nid < %d";
+    db_query($query, $last_nid);
+  }
 
   // Return the number of existing nodes that have been initialized:
   return $count;
