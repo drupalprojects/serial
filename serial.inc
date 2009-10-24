@@ -125,6 +125,7 @@ function _serial_init_old_nodes($field) {
   while ($nid = db_result($result)) {
     $node = node_load($nid);
     $node->{$field_name}[0]['value'] = _serial_generate_value($nid, $field, FALSE);
+    node_save($node);
     $last_nid = $nid;
     $count++;
   }
