@@ -81,15 +81,8 @@ function serial_form_alter(&$form, $form_state, $form_id) {
       );
     }
 
-<<<<<<< serial.module
-      // Go back to Managed Fields:
-      drupal_goto(urldecode($matches[1]));
-=======
-    // Try to skip the empty settings page and go back to Managed Fields:
-    if (preg_match('#^.*destination.*\=(.*)$#', $form['#action'], $matches)) {
-      drupal_goto($matches[1]);
->>>>>>> 1.1
-    }
+    // Go back to Managed Fields:
+    drupal_goto(urldecode($matches[1]));
   }
 }
 
