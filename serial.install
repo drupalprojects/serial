@@ -49,7 +49,7 @@ function serial_schema() {
   $result = db_query($query);
   $schema = array();
   while ($field = db_fetch_array($result)) {
-    $table = _serial_get_table_name($field);
+    $table = _serial_get_field_table_name($field);
     $schema[$table] = $table_schema;
   }
 

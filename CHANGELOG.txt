@@ -1,4 +1,25 @@
+<<<<<<< CHANGELOG.txt
+<<<<<<< CHANGELOG.txt
+// $Id$ 
+
+Serial 6.x-1.0, 2011-01-28
+--------------------------------
+- Fixed a Page Not Found error message [790464].
+- Fixed a bug in renaming content type with a serial field [986872].
+
+Serial 6.x-1.0-rc1, 2009-10-24
+--------------------------------
+- Fixed a beta2-beta4 bug - setting serial values for existing nodes [609148].
+=======
+// $Id$ 
+ 
+Serial 6.x-1.0-rc1, 2009-10-24
+------------------------------
+- Fixed a beta2-beta4 bug - setting serial values of existing nodes [609148].
+>>>>>>> 1.1.2.6
+=======
 //$Id$
+>>>>>>> 1.1
 
 Serial 6.x-1.0 Beta
 ===================
