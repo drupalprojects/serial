@@ -1,12 +1,18 @@
 <?php
 // $Id$
 
-// Note: This module uses php in SQL to support dynamic table names.
-// (required because each serial field needs a dedicated dynamic table).
-// However, all table names are safe (passed through db_escape_table).
-// It seems that this is better than using table names as arguments, e.g.
-//   $query = 'INSERT INTO %s (nid) VALUES(%d)';
-//   db_query($query, db_prefix_tables('{'. $table .'}'), $nid);
+/**
+ * @file
+ * Internal functions for the Serial module.
+ *
+ * Note: This module uses php in SQL to support dynamic table names.
+ * (required because each serial field needs a dedicated dynamic table).
+ * However, all table names are safe (passed through db_escape_table).
+ *
+ * It seems that this is better than using table names as arguments, e.g.
+ *   $query = 'INSERT INTO %s (nid) VALUES(%d)';
+ *   db_query($query, db_prefix_tables('{'. $table .'}'), $nid);
+ */
 
 /**
  * Creates an assistant serial table for a new created field.
@@ -72,11 +78,7 @@ function _serial_get_field_table_name($field) {
  */
 function _serial_get_table_name($type_name, $field_name) {
   return db_escape_table( // be on the safe side
-<<<<<<< serial.inc
     'serial_' . $type_name . '_' . $field_name);
-=======
-    'serial_' . $field['type_name'] . '_' . $field['field_name']);
->>>>>>> 1.1
 }
 
 /**
@@ -121,23 +123,18 @@ function _serial_get_table_schema() {
  */
 function _serial_generate_value($nid, $field, $delete = TRUE) {
   // Insert a temporary record to get a new unique serial value:
-<<<<<<< serial.inc
   $table = _serial_get_field_table_name($field);
   $query = 'INSERT INTO {'. $table .'} (nid) VALUES(%d)';
-=======
-  $table = _serial_get_table_name($field);
-  $query = 'INSERT INTO {' . $table . '} (nid) VALUES(%d)';
->>>>>>> 1.1
   db_query($query, $nid);
 
   // Retrieve the new unique serial value:
-  $query = 'SELECT sid FROM {' . $table . '} WHERE nid = %d';
+  $query = 'SELECT sid FROM {'. $table .'} WHERE nid = %d';
   $result = db_result(db_query($query, $nid));
   $sid = $result ? $result : 0;
 
   // Delete old temporary records:
   if ($delete && ($sid % 10) == 0) {
-    $query = 'DELETE FROM {' . $table . '} WHERE nid < %d';
+    $query = 'DELETE FROM {'. $table .'} WHERE nid < %d';
     db_query($query, $nid);
   }
 
@@ -151,37 +148,27 @@ function _serial_generate_value($nid, $field, $delete = TRUE) {
  * @return the number of existing nodes that have been initialized.
  */
 function _serial_init_old_nodes($field) {
-  // Get database details:
-  $serial_table = _serial_get_table_name($field);
-  $content_table =  db_escape_table( // be on the safe side
-    'content_type_' . $field['type_name']);
-  $field_name = $field['field_name'] . '_value';
-
   // Retrieve all the node ids of that type:
-  $query = "SELECT DISTINCT nid FROM {$content_table} ORDER BY nid";
-  $result = db_query($query);
+  $query = "SELECT DISTINCT nid FROM {node} WHERE type = '%s' ORDER BY nid";
+  $result = db_query($query, $field['type_name']);
 
   // Allocate a serial number for every old node:
   $count = 0;
+  $field_name = $field['field_name'];
   while ($nid = db_result($result)) {
-    $sid = _serial_generate_value($nid, $field, FALSE);
-    $query = "UPDATE {$content_table} SET $field_name = %d WHERE nid = %d";
-    if (db_query($query, $sid, $nid) != FALSE) {
-      $count++;
-    }
+    $node = node_load($nid);
+    $node->{$field_name}[0]['value'] = _serial_generate_value($nid, $field, FALSE);
+    node_save($node);
+    $last_nid = $nid;
+    $count++;
   }
 
   // Delete temporary records (except the last):
-<<<<<<< serial.inc
   if (isset($last_nid)) {
     $serial_table = _serial_get_field_table_name($field);
     $query = "DELETE FROM {$serial_table} WHERE nid < %d";
     db_query($query, $last_nid);
   }
-=======
-  $query = "DELETE FROM {$serial_table} WHERE nid < %d";
-  db_query($query, $nid);
->>>>>>> 1.1
 
   // Return the number of existing nodes that have been initialized:
   return $count;
