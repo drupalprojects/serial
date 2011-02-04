@@ -1,4 +1,4 @@
-<?php
+<?php 
 // $Id$
 
 /**
@@ -7,38 +7,31 @@
  */
 
 /**
- * Implementation of hook_install().
- */
-function serial_install() {
-  drupal_load('module', 'content');
-  content_notify('install', 'serial');
-  drupal_install_schema('serial');
-}
-
-/**
  * Implementation of hook_uninstall().
  */
 function serial_uninstall() {
-  drupal_load('module', 'content');
-  content_notify('uninstall', 'serial');
-  // TODO: Remove orphan serial fields (can always be added again)
-  drupal_uninstall_schema('serial');
+  // TODO: Remove orphan serial fields.
 }
 
 /**
- * Implementation of hook_enable().
+ * Implements hook_field_schema().
  */
-function serial_enable() {
-  drupal_load('module', 'content');
-  content_notify('enable', 'serial');
-}
-
-/**
- * Implementation of hook_disable().
- */
-function serial_disable() {
-  drupal_load('module', 'content');
-  content_notify('disable', 'serial');
+function serial_field_schema($field) {
+  switch ($field['type']) {
+    case 'serial':
+      $columns['value'] = array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'sortable' => TRUE,
+        'views' => TRUE,
+        'index' => TRUE,
+      );
+      break;
+  }
+  return array(
+    'columns' => $columns
+  );
 }
 
 /**
@@ -50,11 +43,13 @@ function serial_schema() {
   $table_schema = _serial_get_table_schema();
 
   // Build the schema by iteration over all the serial field instances:
-  $query = "SELECT type_name, field_name FROM {content_node_field_instance} WHERE widget_module = 'serial'";
-  $result = db_query($query);
   $schema = array();
-  while ($field = db_fetch_array($result)) {
-    $table = _serial_get_field_table_name($field);
+  $query = "SELECT i.bundle AS bundle, f.field_name AS field_name ".
+           "FROM {field_config} f, {field_config_instance} i ".
+           "WHERE f.field_name = i.field_name AND f.type = 'serial' AND i.deleted = 0";
+  $result = db_query($query);
+  foreach ($result as $field) {
+    $table = _serial_get_table_name($field->bundle, $field->field_name);
     $schema[$table] = $table_schema;
   }
 
