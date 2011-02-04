@@ -1,11 +1,11 @@
 // $Id$
-
+ 
 Description
 -----------
-This module provides an auto increment (serial) CCK field.
+This module provides an auto increment (serial) field.
 
-Unlike Drupal built in auto increment node id, which is global and shared by
-nodes of all types - serial fields are managed per node type.
+Unlike Drupal built in auto increment node id, which is global and shared
+by nodes of all types - serial fields are managed per node type.
 For example, a serial field of an Invoice node type will generate a unique
 sequential number (starting at 1, then 2, etc.) dedicated for Invoice nodes.
 
@@ -19,7 +19,8 @@ To submit bug reports and feature suggestions, or to track changes:
 
 Requirements
 ------------
-The CCK module (http://drupal.org/project/content) has to be installed.
+For Drupal 6 - the CCK module (http://drupal.org/project/content) has to be enabled.
+For Drupal 7 - the core Field module has to be enabled.
 
 Optional modules:
 * Token (http://drupal.org/project/token) - to access serial values as tokens.
@@ -28,6 +29,9 @@ Optional modules:
     http://www.example.com/issue/10 (where 10 is a type scope serial number)
   instead of:
     http://www.example.com/node/64564 (where 64564 is a node id)
+
+Note: Currently field tokens are not supported by Drupal 7.
+See:  http://drupal.org/node/691078.
 
 Installation
 ------------
@@ -38,7 +42,7 @@ Usage
 -----
 You can add a serial field to any type at admin/content/types -> manage fields.
 In the New Field form select Serial as the type of data and label and field name
-as your choise, and Save. No other settings.
+as your choice, and Save. No other settings.
 
 Note: Existing nodes will also get serial values when a serial field is added.
 

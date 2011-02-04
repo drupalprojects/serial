@@ -1,5 +1,5 @@
-<?php
-// $Id
+<?php 
+// $Id$
 
 /**
  * @file
@@ -17,39 +17,45 @@
 /**
  * Creates an assistant serial table for a new created field.
  *
- * @param $field a new serial field
+ * @param $field
+ *   a serial field
+ * @param $instance
+ *   a new instance of that serial field
  */
-function _serial_create_table($field) {
-  $table = _serial_get_field_table_name($field);
+function _serial_create_table($field, $instance) {
+  $table = _serial_get_field_table_name($field, $instance);
   $schema = _serial_get_table_schema();
-  db_create_table($ret, $table, $schema);
+  db_create_table($table, $schema);
 }
 
 /**
  * Drops an assistant serial table for a deleted field.
  *
- * @param $field a deleted serial field
+ * @param $field
+ *   a serial field
+ * @param $instance
+ *   a deleted instance of that serial field
  */
-function _serial_drop_table($field) {
-  $table = _serial_get_field_table_name($field);
-  db_drop_table($ret, $table);
+function _serial_drop_table($field, $instance) {
+  $table = _serial_get_field_table_name($field, $instance);
+  db_drop_table($table);
 }
 
 /**
  * Renames serial table(s) when a content type us renamed.
  *
- * @param $old_type_name
+ * @param $old_type
  *   an old node type machine name
- * @param $new_type_name
+ * @param $new_type
  *   a new node type machine name
  */
-function _serial_rename_tables($old_type_name, $new_type_name) {
-  $sql = "SELECT f.field_name FROM {content_node_field} f, {content_node_field_instance} i ".
-         "WHERE f.field_name = i.field_name AND f.type = 'serial' AND i.type_name = '%s'";
-  $result = db_query(db_rewrite_sql($sql), $new_type_name);
+function _serial_rename_tables($old_type, $new_type) {
+  $query = "SELECT f.field_name FROM {field_config} f, {field_config_instance} i ".
+           "WHERE f.field_name = i.field_name AND f.type = 'serial' AND i.bundle = ':type'";
+  $result = db_query(db_rewrite_sql($query), array('type' => $new_type));
   while ($data = db_fetch_object($result)) {
-    $old_table = _serial_get_table_name($old_type_name, $data->field_name);
-    $new_table = _serial_get_table_name($new_type_name, $data->field_name);
+    $old_table = _serial_get_table_name($old_type, $data->field_name);
+    $new_table = _serial_get_table_name($new_type, $data->field_name);
     db_rename_table($ret, $old_table, $new_table);
   }
 }
@@ -58,27 +64,29 @@ function _serial_rename_tables($old_type_name, $new_type_name) {
  * Gets the name of the assistant table for a specific field.
  *
  * @param $field
- *   a serial field instance
+ *   a serial field
+ * @param $instance
+ *   an instance of that serial field
  * @return
  *   the name of the assistant table of the specified field instance.
  */
-function _serial_get_field_table_name($field) {
-  return _serial_get_table_name($field['type_name'], $field['field_name']);
+function _serial_get_field_table_name($field, $instance) {
+  return _serial_get_table_name($instance['bundle'], $field['field_name']);
 }
 
 /**
  * Gets the name of the assistant table for a specific field.
  *
- * @param $type_name
- *   the name of the type that contains the field
+ * @param $bundle
+ *   the name of the entity type that contains the field
  * @param $field_name
  *   the name of the field
  * @return
  *   the name of the assistant table of the specified field.
  */
-function _serial_get_table_name($type_name, $field_name) {
+function _serial_get_table_name($bundle, $field_name) {
   return db_escape_table( // be on the safe side
-    'serial_' . $type_name . '_' . $field_name);
+    'serial_' . $bundle . '_' . $field_name);
 }
 
 /**
@@ -115,27 +123,30 @@ function _serial_get_table_schema() {
  *
  * @param $nid
  *   id of the node for which to generate a serial value
- * @param $field
- *   the serial field
- *
+ * @param $bundle
+ *   a containing bundle (e.g. content type)
+ * @param $field_name
+ *   the field name
+ * @param $delete
+ *   indicates if temporary records should be deleted
  * @return
  *   the unique serial value number.
  */
-function _serial_generate_value($nid, $field, $delete = TRUE) {
+function _serial_generate_value($nid, $bundle, $field_name, $delete = TRUE) {
   // Insert a temporary record to get a new unique serial value:
-  $table = _serial_get_field_table_name($field);
-  $query = 'INSERT INTO {'. $table .'} (nid) VALUES(%d)';
-  db_query($query, $nid);
+  $table = _serial_get_table_name($bundle, $field_name);
+  $query = 'INSERT INTO {'. $table .'} (nid) VALUES(:nid)';
+  db_query($query, array('nid' => $nid));
 
   // Retrieve the new unique serial value:
-  $query = 'SELECT sid FROM {'. $table .'} WHERE nid = %d';
-  $result = db_result(db_query($query, $nid));
+  $query = 'SELECT sid FROM {'. $table .'} WHERE nid = :nid';
+  $result = db_query($query, array('nid' => $nid))->fetchField();
   $sid = $result ? $result : 0;
 
   // Delete old temporary records:
   if ($delete && ($sid % 10) == 0) {
-    $query = 'DELETE FROM {'. $table .'} WHERE nid < %d';
-    db_query($query, $nid);
+    $query = 'DELETE FROM {'. $table .'} WHERE nid < :nid';
+    db_query($query, array('nid' => $nid));
   }
 
   // Return the new unique serial value:
@@ -145,19 +156,26 @@ function _serial_generate_value($nid, $field, $delete = TRUE) {
 /**
  * Initializes the value of a new serial field in existing nodes.
  *
- * @return the number of existing nodes that have been initialized.
+ * @param $bundle
+ *   a containing bundle (e.g. content type)
+ * @param $field_name
+ *   the field name
+ * @return
+ *   the number of existing nodes that have been initialized.
  */
-function _serial_init_old_nodes($field) {
+function _serial_init_old_nodes($bundle, $field_name) {
   // Retrieve all the node ids of that type:
-  $query = "SELECT DISTINCT nid FROM {node} WHERE type = '%s' ORDER BY nid";
-  $result = db_query($query, $field['type_name']);
+  $query = "SELECT nid FROM {node} WHERE type = :type ORDER BY nid";
+    // TODO: Currently works only for nodes - should support comments and users.
+  $result = db_query($query, array('type' => $bundle));
 
   // Allocate a serial number for every old node:
   $count = 0;
-  $field_name = $field['field_name'];
-  while ($nid = db_result($result)) {
+  foreach ($result as $node) {
+    $nid = $node->nid;
     $node = node_load($nid);
-    $node->{$field_name}[0]['value'] = _serial_generate_value($nid, $field, FALSE);
+    $sid = _serial_generate_value($nid, $bundle, $field_name, FALSE);
+    $node->{$field_name} = array('und' => array(array('value' => $sid)));
     node_save($node);
     $last_nid = $nid;
     $count++;
@@ -165,9 +183,9 @@ function _serial_init_old_nodes($field) {
 
   // Delete temporary records (except the last):
   if (isset($last_nid)) {
-    $serial_table = _serial_get_field_table_name($field);
-    $query = "DELETE FROM {$serial_table} WHERE nid < %d";
-    db_query($query, $last_nid);
+    $serial_table = _serial_get_table_name($bundle, $field_name);
+    $query = "DELETE FROM {$serial_table} WHERE nid < :nid";
+    db_query($query, array('nid' => $last_nid));
   }
 
   // Return the number of existing nodes that have been initialized:
