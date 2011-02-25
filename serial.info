@@ -1,4 +1,3 @@
-; $Id$ 
 name = Serial
 description = Defines atomic auto increment (serial) field type.
 package = Fields
