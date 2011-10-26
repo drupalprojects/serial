@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /**
  * @file
@@ -190,3 +190,4 @@ function _serial_init_old_nodes($bundle, $field_name) {
   // Return the number of existing nodes that have been initialized:
   return $count;
 }
+

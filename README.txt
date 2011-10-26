@@ -1,4 +1,4 @@
- 
+
 Description
 -----------
 This module provides an auto increment (serial) field.
@@ -50,3 +50,4 @@ The serial token [field_serial-id] can be used with Path Auto.
 Author
 ------
 Ilan Kirsh
+
