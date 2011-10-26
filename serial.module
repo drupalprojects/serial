@@ -1,14 +1,15 @@
 <?php
+// $Id
 
 /**
  * @file
  * The Serial module main file.
  */
- 
+
 //==================//
 // Field Definition //
 //==================//
- 
+
 /**
  * Implementation of hook_field_info().
  */
@@ -88,7 +89,7 @@ function serial_form_alter(&$form, $form_state, $form_id) {
       }
 
       // Go back to Managed Fields:
-      drupal_goto($matches[1]);
+      drupal_goto(urldecode($matches[1]));
     }
   }
 }
@@ -111,6 +112,21 @@ function serial_field($op, &$node, $field, &$items, $teaser, $page) {
  */
 function serial_content_is_empty($item, $field) {
   return FALSE; // never should be treated as empty
+}
+
+/**
+ * Implementation of hook_node_type()
+ */
+function serial_node_type($op, $info) {
+  switch ($op) {
+    case 'update':
+      // Handle content type rename:
+      if($info->old_type != $info->type) {
+        module_load_include('inc', 'serial');
+        _serial_rename_tables($info->old_type, $info->type);
+      }
+      break;
+  }
 }
 
 /**

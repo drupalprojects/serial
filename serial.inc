@@ -1,5 +1,6 @@
 <?php
- 
+// $Id
+
 /**
  * @file
  * Internal functions for the Serial module.
@@ -12,14 +13,14 @@
  *   $query = 'INSERT INTO %s (nid) VALUES(%d)';
  *   db_query($query, db_prefix_tables('{'. $table .'}'), $nid);
  */
- 
+
 /**
  * Creates an assistant serial table for a new created field.
  *
  * @param $field a new serial field
  */
 function _serial_create_table($field) {
-  $table = _serial_get_table_name($field);
+  $table = _serial_get_field_table_name($field);
   $schema = _serial_get_table_schema();
   db_create_table($ret, $table, $schema);
 }
@@ -30,8 +31,27 @@ function _serial_create_table($field) {
  * @param $field a deleted serial field
  */
 function _serial_drop_table($field) {
-  $table = _serial_get_table_name($field);
+  $table = _serial_get_field_table_name($field);
   db_drop_table($ret, $table);
+}
+
+/**
+ * Renames serial table(s) when a content type us renamed.
+ *
+ * @param $old_type_name
+ *   an old node type machine name
+ * @param $new_type_name
+ *   a new node type machine name
+ */
+function _serial_rename_tables($old_type_name, $new_type_name) {
+  $sql = "SELECT f.field_name FROM {content_node_field} f, {content_node_field_instance} i ".
+         "WHERE f.field_name = i.field_name AND f.type = 'serial' AND i.type_name = '%s'";
+  $result = db_query(db_rewrite_sql($sql), $new_type_name);
+  while ($data = db_fetch_object($result)) {
+    $old_table = _serial_get_table_name($old_type_name, $data->field_name);
+    $new_table = _serial_get_table_name($new_type_name, $data->field_name);
+    db_rename_table($ret, $old_table, $new_table);
+  }
 }
 
 /**
@@ -42,9 +62,23 @@ function _serial_drop_table($field) {
  * @return
  *   the name of the assistant table of the specified field instance.
  */
-function _serial_get_table_name($field) {
+function _serial_get_field_table_name($field) {
+  return _serial_get_table_name($field['type_name'], $field['field_name']);
+}
+
+/**
+ * Gets the name of the assistant table for a specific field.
+ *
+ * @param $type_name
+ *   the name of the type that contains the field
+ * @param $field_name
+ *   the name of the field
+ * @return
+ *   the name of the assistant table of the specified field.
+ */
+function _serial_get_table_name($type_name, $field_name) {
   return db_escape_table( // be on the safe side
-    'serial_'. $field['type_name'] .'_'. $field['field_name']);
+    'serial_' . $type_name . '_' . $field_name);
 }
 
 /**
@@ -89,7 +123,7 @@ function _serial_get_table_schema() {
  */
 function _serial_generate_value($nid, $field, $delete = TRUE) {
   // Insert a temporary record to get a new unique serial value:
-  $table = _serial_get_table_name($field);
+  $table = _serial_get_field_table_name($field);
   $query = 'INSERT INTO {'. $table .'} (nid) VALUES(%d)';
   db_query($query, $nid);
 
@@ -131,7 +165,7 @@ function _serial_init_old_nodes($field) {
 
   // Delete temporary records (except the last):
   if (isset($last_nid)) {
-    $serial_table = _serial_get_table_name($field);
+    $serial_table = _serial_get_field_table_name($field);
     $query = "DELETE FROM {$serial_table} WHERE nid < %d";
     db_query($query, $last_nid);
   }
