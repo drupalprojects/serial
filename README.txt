@@ -1,4 +1,3 @@
-// $Id$
 
 Description
 -----------
@@ -47,3 +46,4 @@ The serial token [field_serial-id] can be used with Path Auto.
 Author
 ------
 Ilan Kirsh
+

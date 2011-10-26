@@ -1,5 +1,4 @@
 <?php
-// $Id
 
 /**
  * @file
@@ -213,3 +212,4 @@ function serial_widget(&$form, &$form_state, $field, $items, $delta = 0) {
     )
   );
 }
+
