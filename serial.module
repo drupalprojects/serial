@@ -120,7 +120,7 @@ function serial_node_type($op, $info) {
   switch ($op) {
     case 'update':
       // Handle content type rename:
-      if($info->old_type != $info->type) {
+      if (isset($info->old_type) && ($info->old_type != $info->type)) {
         module_load_include('inc', 'serial');
         _serial_rename_tables($info->old_type, $info->type);
       }
