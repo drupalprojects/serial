@@ -97,7 +97,7 @@ function serial_field_is_empty($item, $field) {
  */
 function serial_node_type_update($info) {
     // Handle content type rename:
-    if($info->old_type != $info->type) {
+    if (isset($info->old_type) && ($info->old_type != $info->type)) {
       module_load_include('inc', 'serial');
       _serial_rename_tables($info->old_type, $info->type);
     }
