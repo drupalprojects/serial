@@ -9,7 +9,10 @@
  * Implementation of hook_uninstall().
  */
 function serial_uninstall() {
-  // TODO: Remove orphan serial fields.
+  /*
+   * Schema tables are now dropped automatically.  However, if any work needs
+   * to be done before this, do it here.
+   */
 }
 
 /**
