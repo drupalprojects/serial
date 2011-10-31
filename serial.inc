@@ -49,13 +49,24 @@ function _serial_drop_table($field, $instance) {
  *   a new node type machine name
  */
 function _serial_rename_tables($old_type, $new_type) {
-  $query = "SELECT f.field_name FROM {field_config} f, {field_config_instance} i ".
-           "WHERE f.field_name = i.field_name AND f.type = 'serial' AND i.bundle = ':type'";
-  $result = db_query(db_rewrite_sql($query), array('type' => $new_type));
-  while ($data = db_fetch_object($result)) {
-    $old_table = _serial_get_table_name($old_type, $data->field_name);
-    $new_table = _serial_get_table_name($new_type, $data->field_name);
-    db_rename_table($ret, $old_table, $new_table);
+
+  // Build the query to find all affected tables.
+  $query = db_select('field_config', 'f')->fields('f', array('field_name'));
+  $table_joined_alias = $query->join(
+      'field_config_instance', 'i',
+      '(f.field_name = i.field_name) AND ' .
+      '(f.type = :field_type) AND (i.bundle = :bundle_type)',
+      array(':field_type' => 'serial', ':bundle_type' => $new_type)
+  );
+
+  // Add an access check and execute it.
+  $result = $query->addTag('node_access')->execute();
+
+  // Rename each affected table.
+  foreach ($result as $record) {
+    $old_table = _serial_get_table_name($old_type, $record->field_name);
+    $new_table = _serial_get_table_name($new_type, $record->field_name);
+    db_rename_table($old_table, $new_table);
   }
 }
 
