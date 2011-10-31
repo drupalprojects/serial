@@ -143,15 +143,19 @@ function _serial_get_table_schema() {
  *   the unique serial value number.
  */
 function _serial_generate_value($nid, $bundle, $field_name, $delete = TRUE) {
-  // Insert a temporary record to get a new unique serial value:
-  $table = _serial_get_table_name($bundle, $field_name);
-  $query = 'INSERT INTO {'. $table .'} (nid) VALUES(:nid)';
-  db_query($query, array('nid' => $nid));
 
-  // Retrieve the new unique serial value:
-  $query = 'SELECT sid FROM {'. $table .'} WHERE nid = :nid';
-  $result = db_query($query, array('nid' => $nid))->fetchField();
-  $sid = $result ? $result : 0;
+  // Get the name of the relevant table.
+  $table = _serial_get_table_name($bundle, $field_name);
+
+  // Create a temporary record for this node and retrieve the serial value.
+  $sid = db_insert($table)
+    ->fields(array(
+      'nid' => $nid,
+    ))
+    ->execute();
+
+  // If there's a reason why it's come back undefined, reset it.
+  $sid = isset($sid) ? $sid : 0;
 
   // Delete old temporary records:
   if ($delete && ($sid % 10) == 0) {
