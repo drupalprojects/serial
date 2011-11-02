@@ -159,8 +159,9 @@ function _serial_generate_value($nid, $bundle, $field_name, $delete = TRUE) {
 
   // Delete old temporary records:
   if ($delete && ($sid % 10) == 0) {
-    $query = 'DELETE FROM {'. $table .'} WHERE nid < :nid';
-    db_query($query, array('nid' => $nid));
+    db_delete($table)
+      ->condition('nid', $nid, '<')
+      ->execute();
   }
 
   // Return the new unique serial value:
@@ -198,8 +199,9 @@ function _serial_init_old_nodes($bundle, $field_name) {
   // Delete temporary records (except the last):
   if (isset($last_nid)) {
     $serial_table = _serial_get_table_name($bundle, $field_name);
-    $query = "DELETE FROM {$serial_table} WHERE nid < :nid";
-    db_query($query, array('nid' => $last_nid));
+    db_delete($serial_table)
+      ->condition('nid', $last_nid, '<')
+      ->execute();
   }
 
   // Return the number of existing nodes that have been initialized:
