@@ -141,8 +141,8 @@ function serial_node_type_update($info) {
  */
 function serial_field_formatter_info() {
   return array(
-    'default' => array(
-      'label' => '9999',
+    'serial_formatter_default' => array(
+      'label' => t('Default'),
       'field types' => array('serial'),
     )
   );
