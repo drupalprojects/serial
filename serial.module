@@ -153,17 +153,42 @@ function serial_field_formatter_info() {
  */
 function serial_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+
+  // Define the field contents for the single default formatter.
   foreach ($items as $delta => $item) {
-    $element[$delta] = array('#markup' => $item['value']);
+    $element[$delta] = array(
+      '#markup' => theme('serial_formatter_default', array(
+        'serial_id' => $item['value'],
+      ))
+    );
   }
   return $element;
 }
 
+/****************************************************************************
+ ** Theme Functions *********************************************************
+/****************************************************************************/
+
 /**
- * Theme function for 'default' serial field formatter.
+ * Implementation of hook_theme().
  */
-function theme_serial_formatter_default($element) {
-  return $element['#item']['value'];
+function serial_theme() {
+
+  // Register the theme for the default formatter.
+  return array(
+    'serial_formatter_default' => array(
+      'variables' => array(
+        'serial_id' => NULL,
+      ),
+    ),
+  );
+}
+
+/**
+ * Theme function for the default formatter.
+ */
+function theme_serial_formatter_default($variables) {
+  return $variables['serial_id'];
 }
 
 //==============//
