@@ -166,6 +166,8 @@ function _serial_generate_value($bundle, $field_name, $delete = TRUE) {
 /**
  * Initializes the value of a new serial field in existing nodes.
  *
+ * @todo Currently works only for nodes - should support comments and users.
+ *
  * @param string $bundle
  *   Containing bundle (e.g. content type).
  * @param string $field_name
@@ -175,34 +177,23 @@ function _serial_generate_value($bundle, $field_name, $delete = TRUE) {
  *   Number of existing nodes that have been initialized.
  */
 function _serial_init_old_nodes($bundle, $field_name) {
-  // TODO: Currently works only for nodes - should support comments and users.
-  $count = 0;
-  $result = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->condition('type', _anniversaries()->getContentTypeName())
-    ->orderBy('nid')
-    ->execute()
-    ->fetchCol();
+  $nodes = node_load_multiple(array(), array('type' => $bundle));
 
-  if (!empty($result)) {
-    // Allocate a serial number for every old node.
-    foreach ($result as $nid) {
-      $node = node_load($nid);
-      $node->{$field_name} = array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => _serial_generate_value($bundle, $field_name, FALSE),
-          ),
+  // Allocate a serial number for every old node.
+  foreach ($nodes as $node) {
+    $node->{$field_name} = array(
+      LANGUAGE_NONE => array(
+        array(
+          'value' => _serial_generate_value($bundle, $field_name, FALSE),
         ),
-      );
+      ),
+    );
 
-      node_save($node);
-      $count++;
-    }
+    node_save($node);
   }
 
   // Return the number of existing nodes that have been initialized.
-  return $count;
+  return count($nodes);
 }
 
 /**
