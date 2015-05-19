@@ -16,15 +16,16 @@
  * Creates an assistant serial table for a new created field.
  *
  * @param array $field
- *   a serial field
+ *   Serial field.
  * @param array $instance
- *   a new instance of that serial field
+ *   New instance of that serial field.
  */
 function _serial_create_table(array $field, array $instance) {
-  db_create_table(
-    _serial_get_field_table_name($field, $instance),
-    _serial_get_table_schema()
-  );
+  $table = _serial_get_field_table_name($field, $instance);
+
+  if (!db_table_exists($table)) {
+    db_create_table($table, _serial_get_table_schema());
+  }
 }
 
 /**
