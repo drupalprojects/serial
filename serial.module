@@ -17,6 +17,7 @@ function serial_field_info() {
       'property_type' => 'serial',
       'default_widget' => 'serial',
       'default_formatter' => 'serial_formatter_default',
+      'property_type' => 'integer',
     ),
   );
 }
