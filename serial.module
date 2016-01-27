@@ -99,6 +99,20 @@ function serial_node_presave($node) {
 }
 
 /**
+ * Implements hook_clone_node_alter().
+ */
+function serial_clone_node_alter(\stdClass $node) {
+  // Reset values of all serial fields when cloning a node.
+  foreach (field_info_instances('node', $node->type) as $field_name => $instance) {
+    $info = field_info_field($field_name);
+
+    if ('serial' === $info['type']) {
+      $node->{$field_name} = array();
+    }
+  }
+}
+
+/**
  * Implements hook_node_type_update().
  */
 function serial_node_type_update($info) {
