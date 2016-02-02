@@ -5,7 +5,7 @@
  */
 
 /**
- * Class EnvironmentFieldAccessFields.
+ * Class SerialFields.
  */
 class SerialFields {
 

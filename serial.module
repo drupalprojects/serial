@@ -86,12 +86,12 @@ function serial_field_delete_instance(array $instance) {
  * Implements hook_field_presave().
  */
 function serial_field_presave($entity_type, $entity, array $field, array $instance, $langcode, array &$items) {
-  module_load_include('inc', 'serial');
+  if (empty($items)) {
+    module_load_include('inc', 'serial');
 
-  // Remember that here can be only one item
-  // but loop created to make code nicer.
-  foreach ($items as $delta => $item) {
-    $items[$delta]['value'] = _serial_generate_value($entity_type, $instance['bundle'], $field['field_name']);
+    $items[] = array(
+      'value' => _serial_generate_value($entity_type, $instance['bundle'], $field['field_name']),
+    );
   }
 }
 
@@ -100,22 +100,13 @@ function serial_field_presave($entity_type, $entity, array $field, array $instan
  */
 function serial_field_is_empty($item, $field) {
   // Never should be treated as empty.
-  return FALSE;
-}
-
-/**
- * Implements hook_node_presave().
- */
-function serial_node_presave(\stdClass $node) {
-  if (module_exists('auto_nodetitle') && auto_nodetitle_is_needed($node)) {
-    auto_nodetitle_set_title($node);
-  }
+  return empty($item['value']);
 }
 
 /**
  * Implements hook_clone_node_alter().
  */
-function serial_clone_node_alter(\stdClass $node) {
+function serial_clone_node_alter(stdClass $node) {
   // Reset values of all serial fields when cloning a node.
   foreach (field_info_instances('node', $node->type) as $field_name => $instance) {
     $info = field_info_field($field_name);
@@ -195,46 +186,4 @@ function serial_field_widget_form(
   }
 
   return array('value' => $element);
-}
-
-/**
- * Implements hook_tokens().
- */
-function serial_tokens($type, array $tokens, array $data = array(), array $options = array()) {
-  $entity_info = entity_get_info($type);
-  $replacements = array();
-
-  if (empty($entity_info) || empty($data[$type])) {
-    return $replacements;
-  }
-
-  list(, , $bundle) = entity_extract_ids($type, $data[$type]);
-  $pathauto = module_exists('pathauto');
-
-  foreach ($tokens as $name => $original) {
-    // Convert token to field name.
-    $field_name = str_replace('-', '_', $name);
-    $field_info = field_info_field($field_name);
-
-    if (SERIAL_FIELD_TYPE === $field_info['type']) {
-      continue;
-    }
-
-    if ($pathauto && strpos(pathauto_pattern_load_by_entity($type, $bundle), "$type:$field_name") !== FALSE) {
-      continue;
-    }
-
-    /* @var array $items */
-    $items = field_get_items($type, $data[$type], $field_name);
-
-    if (FALSE !== $items) {
-      // Remember that here can be only one item
-      // but loop created to make code nicer.
-      foreach ($items as $delta => $item) {
-        $replacements[$original] = $item['value'];
-      }
-    }
-  }
-
-  return $replacements;
 }

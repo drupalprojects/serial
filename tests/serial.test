@@ -35,7 +35,7 @@ class SerialTestCase extends DrupalWebTestCase {
 
     $this->drupalCreateContentType(array('type' => static::CONTENT_TYPE));
 
-    $this->fields = new \SerialFields(array(
+    $this->fields = new SerialFields(array(
       'serial' => array(
         'type' => SERIAL_FIELD_TYPE,
         'label' => 'Serial',
