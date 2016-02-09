@@ -53,7 +53,7 @@ function serial_field_formatter_info() {
 function serial_field_create_instance(array $instance) {
   $field = field_read_field($instance['field_name']);
 
-  if (SERIAL_FIELD_TYPE == $field['type']) {
+  if (SERIAL_FIELD_TYPE === $field['type']) {
     // Create the assistant table:
     module_load_include('inc', 'serial');
     _serial_create_table($field, $instance);

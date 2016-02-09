@@ -61,7 +61,7 @@ class SerialTestCase extends DrupalWebTestCase {
    * @param int $comments
    *   Number of comments for creation.
    */
-  public function testSerial($nodes = 3, $comments = 6) {
+  public function testSerial($nodes = 15, $comments = 6) {
     for ($i = 0; $i < $nodes; $i++) {
       // Open form for add new node.
       $this->visit('node/add/' . str_replace('_', '-', static::CONTENT_TYPE));
