@@ -92,7 +92,7 @@ function serial_update_7132() {
 
   foreach (db_find_tables('serial_%') as $table) {
     // Explode by underscores and match old format.
-    list(, $entity_type, $bundle, $field_name) = explode('_', $table);
+    list(, $entity_type, $bundle, $field_name) = explode('_', $table, 4);
     db_rename_table($table, _serial_get_table_name($entity_type, $bundle, $field_name));
   }
 }
