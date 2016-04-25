@@ -167,9 +167,9 @@ function _serial_generate_value($entity_type, $bundle, $field_name, $delete = TR
     $sid = isset($sid) ? $sid : 0;
 
     // Delete the temporary record.
-    if ($delete && ($sid % 10) == 0) {
+    if ($delete && $sid && ($sid % 10) == 0) {
       db_delete($table)
-        ->condition('uniqid', $uniqid)
+        ->condition('sid', $sid, '<')
         ->execute();
     }
 
